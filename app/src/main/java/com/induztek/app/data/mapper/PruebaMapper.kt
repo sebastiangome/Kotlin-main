@@ -15,10 +15,12 @@ fun PruebaEntity.toDomain(): Prueba = Prueba(
     fecha          = fecha,
     hora           = hora,
     tecnico        = tecnico,
-    mediciones     = gson.fromJson(medicionesJson, mapType) ?: emptyMap(),
+    mediciones     = runCatching { gson.fromJson<Map<String, String>>(medicionesJson, mapType) }
+        .getOrNull() ?: emptyMap(),
     observaciones  = observaciones,
     fotoUriPath    = fotoUriPath,
-    estado         = EstadoPrueba.valueOf(estado),
+    // Un estado desconocido en la base no debe tumbar la app: se trata como registrado en terreno.
+    estado         = EstadoPrueba.values().firstOrNull { it.name == estado } ?: EstadoPrueba.REGISTRADO_TERRENO,
     sincronizadoAt = sincronizadoAt
 )
 

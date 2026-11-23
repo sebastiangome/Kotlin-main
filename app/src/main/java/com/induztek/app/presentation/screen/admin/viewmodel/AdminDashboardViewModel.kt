@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.induztek.app.domain.model.EstadoPrueba
 import com.induztek.app.domain.model.Prueba
+import com.induztek.app.domain.model.RolUsuario
 import com.induztek.app.domain.repository.AuthRepository
 import com.induztek.app.domain.repository.PruebaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -82,6 +83,20 @@ class AdminDashboardViewModel @Inject constructor(
     fun formalizarPrueba(pruebaId: Long) {
         viewModelScope.launch {
             try {
+                val usuario = authRepository.getUsuarioActual()
+                if (usuario?.rol != RolUsuario.ADMIN) {
+                    _uiState.update { it.copy(error = "Solo un administrador puede formalizar protocolos.") }
+                    return@launch
+                }
+                val prueba = pruebaRepository.getById(pruebaId)
+                if (prueba == null) {
+                    _uiState.update { it.copy(error = "La prueba ya no existe.") }
+                    return@launch
+                }
+                if (prueba.estado == EstadoPrueba.FORMALIZADO) {
+                    _uiState.update { it.copy(error = "Este protocolo ya está formalizado.") }
+                    return@launch
+                }
                 pruebaRepository.updateEstado(pruebaId, EstadoPrueba.FORMALIZADO)
                 _uiState.update { it.copy(mensajeExito = "Protocolo oficial formalizado exitosamente.") }
             } catch (e: Exception) {

@@ -18,7 +18,7 @@ import com.induztek.app.domain.model.TipoEquipo
 fun EquipoEntity.toDomain(): Equipo = Equipo(
     id          = id,
     codigo      = codigo,
-    tipo        = TipoEquipo.valueOf(tipo),   // String → enum
+    tipo        = TipoEquipo.values().firstOrNull { it.name == tipo } ?: TipoEquipo.OTRO,   // String → enum
     instalacion = instalacion,
     descripcion = descripcion
 )

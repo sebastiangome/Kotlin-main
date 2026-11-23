@@ -47,7 +47,8 @@ object DatabaseModule {
             InduztekDatabase::class.java,
             InduztekDatabase.DATABASE_NAME
         )
-            .fallbackToDestructiveMigration()   // ⚠ solo para desarrollo — usar Migration en producción
+            // Sin fallbackToDestructiveMigration(): si cambia el esquema hay que subir la versión
+            // de la base y escribir un Migration, en vez de borrar en silencio los datos del técnico.
             .addCallback(DatabaseCallback(equipoDaoProvider, pruebaDaoProvider))
             .build()
 
